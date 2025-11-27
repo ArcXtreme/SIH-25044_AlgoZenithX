@@ -7,11 +7,16 @@ SECRET_KEY = "supersecretkeyforhackathon"  # Change this in production!
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use argon2 instead of bcrypt to avoid 72-byte limit issue
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
-def verify_password(plain_password, hashed_password):
-    # Simple check matching our dummy hash method in crud.py
-    return plain_password + "notreallyhashed" == hashed_password
+def hash_password(password: str) -> str:
+    """Hash a plain password using argon2"""
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a plain password against its hashed version"""
+    return pwd_context.verify(plain_password, hashed_password)
 
 def create_access_token(data: dict):
     to_encode = data.copy()
