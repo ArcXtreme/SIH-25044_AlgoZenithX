@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 # CONFIGURATION
 SECRET_KEY = "supersecretkeyforhackathon"  # Change this in production!
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 10080
 
 # Use argon2 instead of bcrypt to avoid 72-byte limit issue
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")

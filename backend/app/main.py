@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from backend.app.database import engine, Base
-from backend.app.models import user, crop  # Import both models
-from backend.app.routers import auth, crops  # Import crops router
+from backend.app.models import user, crop, weather, soil  # Add soil
+from backend.app.routers import auth, crops, weather as weather_router, soil as soil_router  # Add soil router
 
-# Create the database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -11,9 +10,10 @@ app = FastAPI(
     version="1.0"
 )
 
-# Register routers
 app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(crops.router, prefix="/api", tags=["Crops & Predictions"])
+app.include_router(weather_router.router, prefix="/api", tags=["Weather"])
+app.include_router(soil_router.router, prefix="/api", tags=["Soil"])  # NEW
 
 @app.get("/")
 def root():

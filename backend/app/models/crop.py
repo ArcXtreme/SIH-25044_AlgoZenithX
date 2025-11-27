@@ -18,6 +18,9 @@ class Field(Base):
     # Relationship
     user = relationship("User", back_populates="fields")
     predictions = relationship("Prediction", back_populates="field")
+    weather_data = relationship("WeatherData", back_populates="field")
+    soil_data = relationship("SoilData", back_populates="field")
+
 
 class Prediction(Base):
     __tablename__ = "predictions"
