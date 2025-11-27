@@ -26,6 +26,7 @@ sql_app.db
 # Environment variables
 .env
 .env.local
+.env*.local
 
 # OS
 .DS_Store
@@ -34,3 +35,7 @@ Thumbs.db
 # Temporary files
 *.log
 .cache/
+.pytest_cache/
+
+# Docker
+docker-compose.override.yml
