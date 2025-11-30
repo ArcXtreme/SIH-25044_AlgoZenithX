@@ -1,0 +1,77 @@
+class AppTranslations {
+  static final Map<String, Map<String, String>> _localizedValues = {
+    'en': {
+      'title': 'AgriSense',
+      'farmer': 'Farmer',
+      'official': 'Official',
+      'login': 'Login',
+      'phone': 'Phone Number',
+      'id': 'Govt ID',
+      'welcome': 'Namaskar',
+      'do_today': 'Do This Today',
+      'ask': 'Ask Assistant',
+      'online': 'Online Mode',
+      'card1_title': 'Irrigate 200L Water',
+      'card1_sub': 'Soil moisture is low (45%)',
+      'card2_title': 'Apply Neem Oil',
+      'card2_sub': 'Pest risk detected',
+      'card3_title': 'Wait to Harvest',
+      'card3_sub': 'Prices rising in 2 days',
+      // --- NEW ADDITIONS ---
+      'rain_alert': 'Rain Alert: Heavy Rain Expected',
+      'crop_health': 'Crop Health Status',
+      'healthy': 'Healthy',
+      'unhealthy': 'Stress Detected',
+    },
+    'hi': {
+      'title': 'एग्रीसेंस',
+      'farmer': 'किसान',
+      'official': 'अधिकारी',
+      'login': 'लॉग इन करें',
+      'phone': 'मोबाइल नंबर',
+      'id': 'सरकारी आईडी',
+      'welcome': 'नमस्ते',
+      'do_today': 'आज के कार्य',
+      'ask': 'सहायक से पूछें',
+      'online': 'ऑनलाइन मोड',
+      'card1_title': '200 लीटर पानी दें',
+      'card1_sub': 'मिट्टी में नमी कम है (45%)',
+      'card2_title': 'नीम का तेल लगाएं',
+      'card2_sub': 'कीट का खतरा है',
+      'card3_title': 'फसल न काटें',
+      'card3_sub': '2 दिनों में दाम बढ़ेंगे',
+      // --- NEW ADDITIONS ---
+      'rain_alert': 'बारिश की चेतावनी: भारी बारिश की संभावना',
+      'crop_health': 'फसल स्वास्थ्य',
+      'healthy': 'स्वस्थ',
+      'unhealthy': 'तनाव का पता चला',
+    },
+    'or': {
+      'title': 'ଆଗ୍ରିସେନ୍ସ',
+      'farmer': 'ଚାଷୀ',
+      'official': 'ଅଧିକାରୀ',
+      'login': 'ଲଗ୍ ଇନ୍',
+      'phone': 'ଫୋନ୍ ନମ୍ବର',
+      'id': 'ସରକାରୀ ପରିଚୟ',
+      'welcome': 'ନମସ୍କାର',
+      'do_today': 'ଆଜିର କାର୍ଯ୍ୟ',
+      'ask': 'ସହାୟକଙ୍କୁ ପଚାରନ୍ତୁ',
+      'online': 'ଅନଲାଇନ୍ ମୋଡ୍',
+      'card1_title': '୨୦୦ ଲିଟର ପାଣି ଦିଅନ୍ତୁ',
+      'card1_sub': 'ମାଟିର ଆର୍ଦ୍ରତା କମ ଅଛି (୪୫%)',
+      'card2_title': 'ନିମ୍ବ ତେଲ ବ୍ୟବହାର କରନ୍ତୁ',
+      'card2_sub': 'ପୋକ ଆକ୍ରମଣର ଆଶଙ୍କା',
+      'card3_title': 'ଅମଳ ଅପେକ୍ଷା କରନ୍ତୁ',
+      'card3_sub': '୨ ଦିନରେ ଦର ବଢିବ',
+      // --- NEW ADDITIONS ---
+      'rain_alert': 'ବର୍ଷା ସତର୍କତା: ଭାରୀ ବର୍ଷା ହେବାର ସମ୍ଭାବନା',
+      'crop_health': 'ଫସଲ ସ୍ୱାସ୍ଥ୍ୟ',
+      'healthy': 'ସୁସ୍ଥ',
+      'unhealthy': 'ଫସଲ ଚିନ୍ତାଜନକ',
+    },
+  };
+
+  static String get(String code, String key) {
+    return _localizedValues[code]?[key] ?? key;
+  }
+}
