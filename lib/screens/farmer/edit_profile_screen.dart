@@ -11,7 +11,6 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  // Controllers to hold text inputs
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _landController;
@@ -22,12 +21,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Load current data from the Provider
     final state = Provider.of<AppState>(context, listen: false);
     _nameController = TextEditingController(text: state.farmerName);
     _phoneController = TextEditingController(text: state.farmerPhone);
     _landController = TextEditingController(text: state.landSize);
-    _selectedCrop = state.crop;
+    
+    // Safety check: If the current crop isn't in our new short list, default to Paddy
+    _selectedCrop = (state.selectedCrop == "Wheat" || state.selectedCrop == "Sugarcane") 
+        ? "Paddy (Rice)" 
+        : state.selectedCrop;
+        
     _selectedDistrict = state.district;
   }
 
@@ -44,20 +47,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          // SAVE BUTTON
           TextButton(
             onPressed: () {
-              // Save to Global State
               Provider.of<AppState>(context, listen: false).updateProfile(
                 _nameController.text,
                 _phoneController.text,
-                _selectedCrop,
+                [_selectedCrop], // Send as List
                 _landController.text,
                 _selectedDistrict
               );
-              Navigator.pop(context); // Go back
-              
-              // Show Success
+              Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Profile Updated Successfully! ✅"), backgroundColor: Colors.green)
               );
@@ -70,7 +69,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Profile Pic
             Center(
               child: Stack(
                 children: [
@@ -110,7 +108,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       _buildLabel("Primary Crop"),
                       DropdownButtonFormField<String>(
                         value: _selectedCrop,
-                        items: ["Paddy (Rice)", "Cotton", "Wheat", "Sugarcane"].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                        // --- ONLY PADDY AND COTTON NOW ---
+                        items: ["Paddy (Rice)", "Cotton"].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                         onChanged: (v) => setState(() => _selectedCrop = v!),
                         decoration: _inputDecor("Select Crop"),
                       ),

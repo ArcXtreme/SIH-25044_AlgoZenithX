@@ -5,21 +5,26 @@ class AppState extends ChangeNotifier {
   int _userRole = 0;
   String _languageCode = 'en';
 
-  // 2. EDITABLE FARMER PROFILE DATA
+  // 2. FARMER DATA
   String _farmerName = "Rajesh Kumar";
   String _farmerPhone = "9876543210";
-  String _crop = "Paddy (Rice)";
   String _landSize = "2.5 Acres";
   String _district = "Khordha";
+
+  // 3. MULTI-CROP LOGIC (NEW!)
+  List<String> _myCrops = ["Paddy (Rice)"]; // Default list
+  String _selectedCrop = "Paddy (Rice)";    // The one currently showing on dashboard
 
   // Getters
   int get userRole => _userRole;
   String get languageCode => _languageCode;
   String get farmerName => _farmerName;
   String get farmerPhone => _farmerPhone;
-  String get crop => _crop;
   String get landSize => _landSize;
   String get district => _district;
+  
+  List<String> get myCrops => _myCrops;
+  String get selectedCrop => _selectedCrop;
 
   // Setters
   void setUserRole(int role) {
@@ -32,13 +37,20 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // UPDATE PROFILE FUNCTION
-  void updateProfile(String name, String phone, String newCrop, String size, String dist) {
+  // Switch which crop we are looking at
+  void selectCrop(String crop) {
+    _selectedCrop = crop;
+    notifyListeners(); // Updates the dashboard instantly
+  }
+
+  // Update Profile (Called from Signup/Edit)
+  void updateProfile(String name, String phone, List<String> crops, String size, String dist) {
     _farmerName = name;
     _farmerPhone = phone;
-    _crop = newCrop;
+    _myCrops = crops;
+    _selectedCrop = crops.isNotEmpty ? crops[0] : "Paddy (Rice)"; // Default to first crop
     _landSize = size;
     _district = dist;
-    notifyListeners(); // Updates the Sidebar and Dashboard instantly!
+    notifyListeners();
   }
 }
