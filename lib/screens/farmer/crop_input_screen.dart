@@ -46,86 +46,92 @@ class _CropInputScreenState extends State<CropInputScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Farm Details", style: GoogleFonts.poppins(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text(
+          "Farm Configuration", 
+          style: GoogleFonts.poppins(
+            color: const Color(0xFF1B5E20), 
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5
+          )
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        automaticallyImplyLeading: false, // No back button, they MUST fill this
+        automaticallyImplyLeading: false, 
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Let's set up your farm profile 🚜",
-                style: GoogleFonts.openSans(fontSize: 16, color: Colors.grey[600]),
+                "Configure your farm details to get precise AI predictions.",
+                style: GoogleFonts.openSans(fontSize: 14, color: Colors.grey[600], height: 1.5),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 35),
 
               // --- 1. CROP SELECTION ---
-              _buildSectionLabel("1. Select Crop"),
-              DropdownButtonFormField<String>(
+              _buildSectionLabel("Crop Type"),
+              _buildAnimatedDropdown(
+                hint: "Select Crop",
                 value: _selectedCrop,
-                decoration: _inputDecoration("Choose Crop"),
-                items: _cropTypes.map((crop) => DropdownMenuItem(value: crop, child: Text(crop))).toList(),
+                items: _cropTypes,
                 onChanged: (val) => setState(() => _selectedCrop = val),
-                validator: (val) => val == null ? "Please select a crop" : null,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
               // --- 2. SEASON SELECTION ---
-              _buildSectionLabel("2. Select Season"),
-              DropdownButtonFormField<String>(
+              _buildSectionLabel("Growing Season"),
+              _buildAnimatedDropdown(
+                hint: "Select Season",
                 value: _selectedSeason,
-                decoration: _inputDecoration("Choose Season"),
-                items: _seasons.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                items: _seasons,
                 onChanged: (val) => setState(() => _selectedSeason = val),
-                validator: (val) => val == null ? "Please select a season" : null,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
               // --- 3. DISTRICT SELECTION ---
-              _buildSectionLabel("3. Select District"),
-              DropdownButtonFormField<String>(
+              _buildSectionLabel("District"),
+              _buildAnimatedDropdown(
+                hint: "Select District",
                 value: _selectedDistrict,
-                decoration: _inputDecoration("Choose District"),
-                items: _districts.map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
+                items: _districts,
                 onChanged: (val) => setState(() => _selectedDistrict = val),
-                validator: (val) => val == null ? "Please select a district" : null,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
               // --- 4. LAND AREA ---
-              _buildSectionLabel("4. Land Area (Acres)"),
-              TextFormField(
-                controller: _areaController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: _inputDecoration("e.g. 2.5"),
-                validator: (val) {
-                  if (val == null || val.isEmpty) return "Please enter land area";
-                  if (double.tryParse(val) == null) return "Invalid number";
-                  return null;
-                },
-              ),
-              const SizedBox(height: 40),
+              _buildSectionLabel("Land Area (Acres)"),
+              _buildStyledTextField(),
+              
+              const SizedBox(height: 50),
 
               // --- SUBMIT BUTTON ---
               SizedBox(
                 width: double.infinity,
-                height: 55,
+                height: 56,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2E7D32),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 5,
+                    elevation: 8,
+                    shadowColor: const Color(0xFF2E7D32).withOpacity(0.4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   onPressed: _submitForm,
-                  child: const Text("Go to Dashboard 🚀", style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    "Go to Dashboard", 
+                    style: GoogleFonts.poppins(
+                      fontSize: 16, 
+                      color: Colors.white, 
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1
+                    )
+                  ),
                 ),
               ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -135,7 +141,6 @@ class _CropInputScreenState extends State<CropInputScreen> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      // Save data to AppState
       Provider.of<AppState>(context, listen: false).setFarmDetails(
         crop: _selectedCrop!,
         season: _selectedSeason!,
@@ -143,7 +148,6 @@ class _CropInputScreenState extends State<CropInputScreen> {
         area: _areaController.text,
       );
 
-      // Navigate to Home
       Navigator.pushReplacement(
         context, 
         MaterialPageRoute(builder: (_) => const FarmerHomeScreen())
@@ -153,20 +157,122 @@ class _CropInputScreenState extends State<CropInputScreen> {
 
   Widget _buildSectionLabel(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+      padding: const EdgeInsets.only(bottom: 10.0, left: 4),
+      child: Text(
+        text.toUpperCase(), 
+        style: GoogleFonts.openSans(
+          fontWeight: FontWeight.bold, 
+          fontSize: 12, 
+          color: Colors.grey[700],
+          letterSpacing: 1.1
+        )
+      ),
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey[300]!)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 2)),
-      filled: true,
-      fillColor: Colors.grey[50],
+  // --- CUSTOM DROPDOWN ---
+  Widget _buildAnimatedDropdown({
+    required String hint,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF2E7D32)),
+      isExpanded: true, // IMPORTANT: Ensures text doesn't overflow
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: GoogleFonts.openSans(color: Colors.grey[400]),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        fillColor: const Color(0xFFF8FAF8), 
+        filled: true,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey[200]!)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 1.5)),
+      ),
+      dropdownColor: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 4,
+      // --- FIX IS HERE: selectedItemBuilder ---
+      // This tells Flutter: "When selected, display THIS widget instead of the menu item"
+      selectedItemBuilder: (BuildContext context) {
+        return items.map<Widget>((String item) {
+          return Text(
+            item,
+            style: GoogleFonts.openSans(
+              color: const Color(0xFF1B5E20),
+              fontWeight: FontWeight.w600,
+              fontSize: 15,
+            ),
+            overflow: TextOverflow.ellipsis,
+          );
+        }).toList();
+      },
+      // --- MENU ITEMS (Glassy Bars) ---
+      items: items.asMap().entries.map((entry) {
+        int idx = entry.key;
+        String val = entry.value;
+        
+        // Alternating Colors logic
+        Color bgColor = idx % 2 == 0 
+            ? const Color(0xFF2E7D32).withOpacity(0.12)  
+            : const Color(0xFF2E7D32).withOpacity(0.04); 
+
+        return DropdownMenuItem(
+          value: val,
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              color: bgColor, // This background only shows in the POPUP MENU now
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(radius: 3, backgroundColor: const Color(0xFF2E7D32).withOpacity(0.6)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    val,
+                    style: GoogleFonts.openSans(
+                      color: const Color(0xFF1B5E20),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+      onChanged: onChanged,
+      validator: (val) => val == null ? "Required field" : null,
+    );
+  }
+
+  Widget _buildStyledTextField() {
+    return TextFormField(
+      controller: _areaController,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      style: GoogleFonts.openSans(fontWeight: FontWeight.bold, color: const Color(0xFF1B5E20)),
+      decoration: InputDecoration(
+        hintText: "e.g. 2.5",
+        hintStyle: GoogleFonts.openSans(color: Colors.grey[400], fontWeight: FontWeight.normal),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        fillColor: const Color(0xFFF8FAF8),
+        filled: true,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey[200]!)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF2E7D32), width: 1.5)),
+        suffixIcon: const Icon(Icons.landscape, color: Colors.grey, size: 20),
+      ),
+      validator: (val) {
+        if (val == null || val.isEmpty) return "Enter area";
+        if (double.tryParse(val) == null) return "Invalid";
+        return null;
+      },
     );
   }
 }

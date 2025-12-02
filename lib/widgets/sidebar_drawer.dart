@@ -1,3 +1,4 @@
+// Needed for FileImage
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,6 +7,7 @@ import '../providers/app_state.dart';
 import '../data/crop_data.dart';
 import '../utils/translations.dart';
 import '../screens/login_screen.dart';
+import '../screens/farmer/edit_profile_screen.dart'; // <--- IMPORT THIS
 
 class SidebarDrawer extends StatelessWidget {
   const SidebarDrawer({super.key});
@@ -21,33 +23,70 @@ class SidebarDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: [
-          // 1. HEADER
-          UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF2E7D32), Color(0xFF1B5E20)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+          // 1. HEADER (NOW CLICKABLE!)
+          GestureDetector(
+            onTap: () {
+              // Close the drawer first
+              Navigator.pop(context);
+              // Navigate to Edit Profile
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (_) => const EditProfileScreen())
+              );
+            },
+            child: UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF2E7D32), Color(0xFF1B5E20)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
               ),
-            ),
-            accountName: Text(
-              appState.farmerName, 
-              style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)
-            ),
-            accountEmail: Row(
-              children: [
-                const Icon(Icons.location_on, size: 14, color: Colors.white70),
-                const SizedBox(width: 4),
-                Text("${appState.district} • ${appState.season}", style: const TextStyle(color: Colors.white70)),
+              accountName: Row(
+                children: [
+                  Text(
+                    appState.farmerName, 
+                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)
+                  ),
+                  const SizedBox(width: 8),
+                  // VISUAL CUE: PENCIL ICON
+                  const Icon(Icons.edit, color: Colors.white70, size: 16),
+                ],
+              ),
+              accountEmail: Row(
+                children: [
+                  const Icon(Icons.location_on, size: 14, color: Colors.white70),
+                  const SizedBox(width: 4),
+                  Text("${appState.district} • ${appState.season}", style: const TextStyle(color: Colors.white70)),
+                ],
+              ),
+              currentAccountPicture: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                  // Display image if available
+                  image: appState.profileImage != null 
+                      ? DecorationImage(
+                          image: FileImage(appState.profileImage!), 
+                          fit: BoxFit.cover
+                        )
+                      : null,
+                ),
+                child: appState.profileImage == null 
+                    ? const Icon(Icons.person, color: Color(0xFF2E7D32), size: 40) 
+                    : null,
+              ),
+              // Arrow icon on the right to show it's clickable
+              otherAccountsPictures: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 18),
+                  onPressed: () {
+                     Navigator.pop(context);
+                     Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()));
+                  },
+                )
               ],
-            ),
-            currentAccountPicture: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: const Icon(Icons.person, color: Color(0xFF2E7D32), size: 40),
             ),
           ),
 

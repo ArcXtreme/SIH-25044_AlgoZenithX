@@ -35,7 +35,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
     final Color healthBg = isStressed ? Colors.red[50]! : Colors.green[50]!;
     final IconData healthIcon = isStressed ? FontAwesomeIcons.triangleExclamation : FontAwesomeIcons.leaf;
     final String healthTitle = isStressed ? "Stress Detected" : "Healthy Crop";
-    final String healthSubtitle = isStressed ? cropInfo.healthIssue : "${cropInfo.days}";
+    final String healthSubtitle = isStressed ? cropInfo.healthIssue : cropInfo.days;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -45,7 +45,7 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
       drawer: const SidebarDrawer(), // Using the new separate file
       
       // --- AI VOICE ASSISTANT BUTTON ---
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showListeningModal(context),
         backgroundColor: const Color(0xFF2E7D32),
