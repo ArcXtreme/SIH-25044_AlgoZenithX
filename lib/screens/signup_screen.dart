@@ -54,7 +54,7 @@ class _SignupScreenState extends State<SignupScreen> {
             const Text("District", style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _selectedDistrict,
+              initialValue: _selectedDistrict,
               items: const [DropdownMenuItem(value: "Khordha", child: Text("Khordha")), DropdownMenuItem(value: "Puri", child: Text("Puri")), DropdownMenuItem(value: "Cuttack", child: Text("Cuttack")), DropdownMenuItem(value: "Ganjam", child: Text("Ganjam"))],
               onChanged: (v) => setState(() => _selectedDistrict = v!),
               decoration: InputDecoration(border: OutlineInputBorder(borderRadius: BorderRadius.circular(10))),

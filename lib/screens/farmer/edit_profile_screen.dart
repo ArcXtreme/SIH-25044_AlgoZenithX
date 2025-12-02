@@ -92,7 +92,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
             _buildLabel("District"),
             DropdownButtonFormField<String>(
-              value: _selectedDistrict,
+              initialValue: _selectedDistrict,
               items: ["Khordha", "Puri", "Cuttack", "Ganjam"].map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
               onChanged: (v) => setState(() => _selectedDistrict = v!),
               decoration: _inputDecor("Select District"),
@@ -107,7 +107,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     children: [
                       _buildLabel("Primary Crop"),
                       DropdownButtonFormField<String>(
-                        value: _selectedCrop,
+                        initialValue: _selectedCrop,
                         // --- ONLY PADDY AND COTTON NOW ---
                         items: ["Paddy (Rice)", "Cotton"].map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                         onChanged: (v) => setState(() => _selectedCrop = v!),
