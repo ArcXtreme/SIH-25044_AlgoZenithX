@@ -71,12 +71,12 @@ class QuickToolsWidget extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.info_outline, color: Colors.orange),
               title: Text(AppTranslations.get(lang, 'pm_kisan')),
-              subtitle: Text(AppTranslations.get(lang, 'action_kyc')),
+              subtitle: Text("${AppTranslations.get(lang, 'action_kyc')}"),
             ),
             ListTile(
               leading: const Icon(Icons.hourglass_empty, color: Colors.grey),
               title: Text(AppTranslations.get(lang, 'machinery_subsidy')),
-              subtitle: Text(AppTranslations.get(lang, 'status_pending')),
+              subtitle: Text("${AppTranslations.get(lang, 'status_pending')}"),
             ),
           ],
         ),

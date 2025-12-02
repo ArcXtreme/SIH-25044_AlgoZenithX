@@ -5,26 +5,29 @@ class AppState extends ChangeNotifier {
   int _userRole = 0;
   String _languageCode = 'en';
 
-  // 2. FARMER DATA
+  // 2. FARMER BASIC DATA
   String _farmerName = "Rajesh Kumar";
   String _farmerPhone = "9876543210";
-  String _landSize = "2.5 Acres";
-  String _district = "Khordha";
 
-  // 3. MULTI-CROP LOGIC (NEW!)
-  List<String> _myCrops = ["Paddy (Rice)"]; // Default list
-  String _selectedCrop = "Paddy (Rice)";    // The one currently showing on dashboard
+  // 3. FARM DETAILS (UPDATED)
+  // We still keep the list for multi-crop if needed later, but focus on the 'current' selection
+  List<String> _myCrops = ["Paddy (Rice)"]; 
+  String _selectedCrop = "Paddy (Rice)";    
+  String _season = "Autumn (June-Oct)";
+  String _district = "Khordha";
+  String _landSize = "2.5 Acres";
 
   // Getters
   int get userRole => _userRole;
   String get languageCode => _languageCode;
   String get farmerName => _farmerName;
   String get farmerPhone => _farmerPhone;
-  String get landSize => _landSize;
-  String get district => _district;
   
-  List<String> get myCrops => _myCrops;
   String get selectedCrop => _selectedCrop;
+  String get season => _season;
+  String get district => _district;
+  String get landSize => _landSize;
+  List<String> get myCrops => _myCrops; // Backward compatibility
 
   // Setters
   void setUserRole(int role) {
@@ -37,20 +40,39 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Switch which crop we are looking at
-  void selectCrop(String crop) {
+  // --- NEW: SET FARM DETAILS FROM INPUT SCREEN ---
+  void setFarmDetails({
+    required String crop,
+    required String season,
+    required String district,
+    required String area,
+  }) {
     _selectedCrop = crop;
-    notifyListeners(); // Updates the dashboard instantly
+    _season = season;
+    _district = district;
+    _landSize = "$area Acres";
+    
+    // Ensure the selected crop is in our list
+    if (!_myCrops.contains(crop)) {
+      _myCrops.add(crop);
+    }
+    
+    notifyListeners();
   }
 
-  // Update Profile (Called from Signup/Edit)
+  // Legacy Update Profile (Called from Signup/Edit - kept for compatibility but simplified)
   void updateProfile(String name, String phone, List<String> crops, String size, String dist) {
     _farmerName = name;
     _farmerPhone = phone;
-    _myCrops = crops;
-    _selectedCrop = crops.isNotEmpty ? crops[0] : "Paddy (Rice)"; // Default to first crop
-    _landSize = size;
-    _district = dist;
+    // We don't overwrite the specific session details here necessarily, 
+    // unless you want profile edit to reset everything. 
+    // For now, let's just update basic info.
+    notifyListeners();
+  }
+  
+  // Simple crop switch if needed
+  void selectCrop(String crop) {
+    _selectedCrop = crop;
     notifyListeners();
   }
 }

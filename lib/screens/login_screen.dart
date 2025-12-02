@@ -5,7 +5,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/app_state.dart';
 import '../utils/translations.dart';
-import 'farmer/farmer_home.dart';
+// import 'farmer/farmer_home.dart'; // No longer direct to home
+import 'farmer/crop_input_screen.dart'; // NEW IMPORT
 import 'admin/admin_dashboard.dart';
 import 'signup_screen.dart'; 
 
@@ -42,15 +43,14 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           
-          // 2. SUBTLE PATTERN (Optional: Adds texture so it's not "flat")
-          // We use a simple white radial gradient to act as a spotlight
+          // 2. SUBTLE PATTERN
           Container(
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: const Alignment(0, -0.5), // Near the logo
+                center: const Alignment(0, -0.5), 
                 radius: 1.5,
                 colors: [
-                  Colors.white.withOpacity(0.1), // Highlight
+                  Colors.white.withOpacity(0.1), 
                   Colors.transparent,
                 ],
               ),
@@ -75,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(width: 8),
                           DropdownButton<String>(
                             value: lang,
-                            dropdownColor: const Color(0xFF1B5E20), // Dark Green dropdown
+                            dropdownColor: const Color(0xFF1B5E20), 
                             underline: Container(),
                             icon: const Icon(Icons.arrow_drop_down, color: Colors.white70),
                             style: const TextStyle(color: Colors.white),
@@ -95,11 +95,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       
                       const Spacer(),
           
-                      // LOGO (White Icon for contrast)
+                      // LOGO
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15), // Glass effect
+                          color: Colors.white.withOpacity(0.15), 
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white30, width: 1.5)
                         ),
@@ -121,11 +121,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 50),
           
-                      // GLASS CARD CONTAINER (Modified to look good on Green)
+                      // GLASS CARD
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1), // 10% White
+                          color: Colors.white.withOpacity(0.1), 
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(color: Colors.white24),
                           boxShadow: [
@@ -142,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.2), // Darker background for toggle
+                                color: Colors.black.withOpacity(0.2), 
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
@@ -174,15 +174,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               height: 55,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white, // White button stands out on green
-                                  foregroundColor: const Color(0xFF1B5E20), // Green text
+                                  backgroundColor: Colors.white, 
+                                  foregroundColor: const Color(0xFF1B5E20), 
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                   elevation: 0,
                                 ),
                                 onPressed: () {
                                   Provider.of<AppState>(context, listen: false).setUserRole(_selectedRole);
                                   if (_selectedRole == 0) {
-                                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const FarmerHomeScreen()));
+                                    // CHANGED: Go to CropInputScreen instead of FarmerHomeScreen
+                                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const CropInputScreen()));
                                   } else {
                                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const AdminDashboard()));
                                   }
