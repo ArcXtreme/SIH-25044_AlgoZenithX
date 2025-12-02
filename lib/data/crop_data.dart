@@ -6,8 +6,12 @@ class Task {
   final String subtitle;
   final IconData icon;
   final Color color;
-  final String badge; // "Critical", "Alert", "Profit"
-  final bool isMoney; // Adds a trending up icon if true
+  final String badge;
+  final bool isMoney;
+  final String popupTitle;
+  final String popupBody;
+  final String source;
+  final bool isVerified;
 
   Task({
     required this.title,
@@ -16,16 +20,24 @@ class Task {
     required this.color,
     required this.badge,
     this.isMoney = false,
+    required this.popupTitle,
+    required this.popupBody,
+    this.source = "AgriSense AI",
+    this.isVerified = true,
   });
 }
 
 class CropInfo {
   final String name;
   final String stage;
-  final double progress; // 0.0 to 1.0
+  final double progress;
   final String days;
   final bool isHealthy;
+  final String healthIssue;
   final List<Task> tasks;
+  final List<double> yieldHistory; 
+  final double predictedYield;     
+  final String weatherType;        
 
   CropInfo({
     required this.name,
@@ -33,108 +45,139 @@ class CropInfo {
     required this.progress,
     required this.days,
     required this.isHealthy,
+    this.healthIssue = "",
     required this.tasks,
+    required this.yieldHistory,
+    required this.predictedYield,
+    required this.weatherType,
   });
 }
 
 class CropData {
-  // DEFAULT FALLBACK (If a crop isn't fully defined yet)
   static final CropInfo _default = CropInfo(
-    name: "Crop",
-    stage: "Growth Stage",
-    progress: 0.5,
-    days: "Day 30 of 90",
-    isHealthy: true,
-    tasks: [
-      Task(title: "Check Soil Moisture", subtitle: "Ensure adequate water", icon: FontAwesomeIcons.droplet, color: Colors.blue, badge: "Daily"),
-      Task(title: "Scout for Pests", subtitle: "Look for leaf damage", icon: FontAwesomeIcons.magnifyingGlass, color: Colors.orange, badge: "Alert"),
-    ],
+    name: "Crop", stage: "Growth", progress: 0.5, days: "Day 30", isHealthy: true,
+    tasks: [], yieldHistory: [10, 11, 12, 11, 13], predictedYield: 14, weatherType: "Sunny"
   );
 
   static final Map<String, CropInfo> _data = {
-    // --- 1. PADDY ---
+    // --- 1. PADDY (Rainy & Healthy) ---
     "Paddy (Rice)": CropInfo(
       name: "Paddy (Rice)",
       stage: "Vegetative Stage",
       progress: 0.4,
       days: "Day 45 of 120",
       isHealthy: true,
+      yieldHistory: [35, 38, 36, 40, 42],
+      predictedYield: 45.5,
+      weatherType: "Rainy", 
       tasks: [
-        Task(title: "Irrigate 200L", subtitle: "Soil moisture low (45%)", icon: FontAwesomeIcons.droplet, color: Colors.blue, badge: "Critical"),
-        Task(title: "Apply Neem Oil", subtitle: "Stem Borer detected", icon: FontAwesomeIcons.bug, color: Colors.orange, badge: "Alert"),
-        Task(title: "Wait to Harvest", subtitle: "Prices rising ₹20/Qt", icon: FontAwesomeIcons.indianRupeeSign, color: Colors.green, badge: "Profit +10%", isMoney: true),
+        Task(
+          title: "Irrigate 200L",
+          subtitle: "Soil moisture low (45%)",
+          icon: FontAwesomeIcons.droplet,
+          color: Colors.blue,
+          badge: "Critical",
+          popupTitle: "Irrigation Alert",
+          popupBody: "Paddy requires standing water of 2-5cm at this stage. Your soil sensor indicates moisture has dropped. Irrigate immediately to prevent yield loss.",
+          source: "Soil Sensor #1",
+        ),
+        Task(
+          title: "Check Stem Borer",
+          subtitle: "Risk: High",
+          icon: FontAwesomeIcons.bug,
+          color: Colors.orange,
+          badge: "Advisory",
+          popupTitle: "Pest Warning: Stem Borer",
+          popupBody: "Humid weather detected. Look for 'Dead Hearts' (dried central shoots). If >5% damage, apply Chlorantraniliprole 0.4% GR.",
+          source: "Agri-Weather AI",
+        ),
       ],
     ),
 
-    // --- 2. GROUNDNUT ---
-    "Groundnut": CropInfo(
-      name: "Groundnut",
-      stage: "Pegging Stage",
-      progress: 0.6,
-      days: "Day 60 of 110",
-      isHealthy: false, // Simulating an issue
+    // --- 2. WHEAT (Sunny & Unhealthy Example) ---
+    "Wheat": CropInfo(
+      name: "Wheat",
+      stage: "Crown Root Initiation",
+      progress: 0.3,
+      days: "Day 25 of 120",
+      isHealthy: false, // <--- STRESS DETECTED! (RED CARD)
+      healthIssue: "Yellow Rust Detected",
+      yieldHistory: [18, 20, 19, 21, 18],
+      predictedYield: 16.5, // Lower due to disease
+      weatherType: "Sunny",
       tasks: [
-        Task(title: "Apply Gypsum", subtitle: "Boosts pod formation", icon: FontAwesomeIcons.cubesStacked, color: Colors.purple, badge: "Recommended"),
-        Task(title: "Check Tikka Disease", subtitle: "Leaf spots observed", icon: FontAwesomeIcons.triangleExclamation, color: Colors.red, badge: "Critical"),
-        Task(title: "Weeding", subtitle: "Clear inter-row space", icon: FontAwesomeIcons.scissors, color: Colors.brown, badge: "Routine"),
+        Task(
+          title: "Spray Propiconazole",
+          subtitle: "Rust pustules found",
+          icon: FontAwesomeIcons.sprayCan,
+          color: Colors.red,
+          badge: "Urgent",
+          popupTitle: "Yellow Rust Management",
+          popupBody: "Yellow Rust (Stripe Rust) detected in your zone. Spray Propiconazole 25 EC @ 1ml/L water immediately to stop spread.",
+          source: "Drone Survey #9",
+        ),
+        Task(
+          title: "Apply Nitrogen",
+          subtitle: "Top dressing due",
+          icon: FontAwesomeIcons.sackDollar,
+          color: Colors.green,
+          badge: "Growth",
+          popupTitle: "Fertilizer Schedule",
+          popupBody: "It is time for the first top dressing of Urea (Nitrogen) after the first irrigation. Apply 40kg/acre.",
+          source: "Schedule",
+        ),
       ],
     ),
 
-    // --- 3. SUGARCANE ---
-    "Sugarcane": CropInfo(
-      name: "Sugarcane",
-      stage: "Grand Growth",
-      progress: 0.7,
-      days: "Month 6 of 12",
-      isHealthy: true,
-      tasks: [
-        Task(title: "Detrashing", subtitle: "Remove dry leaves", icon: FontAwesomeIcons.leaf, color: Colors.green, badge: "Yield +5%"),
-        Task(title: "Propping", subtitle: "Prevent lodging from wind", icon: FontAwesomeIcons.textHeight, color: Colors.blueGrey, badge: "Advisory"),
-        Task(title: "Irrigation", subtitle: "Maintain 50% moisture", icon: FontAwesomeIcons.water, color: Colors.blue, badge: "Daily"),
-      ],
-    ),
-
-    // --- 4. COTTON ---
-    "Cotton": CropInfo(
-      name: "Cotton",
-      stage: "Boll Development",
-      progress: 0.8,
-      days: "Day 90 of 150",
-      isHealthy: false,
-      tasks: [
-        Task(title: "Check Pink Bollworm", subtitle: "Pheromone trap alert", icon: FontAwesomeIcons.locust, color: Colors.red, badge: "High Risk"),
-        Task(title: "Spray Potassium", subtitle: "Improves fiber strength", icon: FontAwesomeIcons.sprayCan, color: Colors.orange, badge: "Nutrition"),
-      ],
-    ),
-
-    // --- 5. POTATO ---
+    // --- 3. POTATO (Sunny & Healthy) ---
     "Potato": CropInfo(
       name: "Potato",
       stage: "Tuber Bulking",
-      progress: 0.75,
-      days: "Day 70 of 90",
+      progress: 0.60,
+      days: "Day 55 of 90",
       isHealthy: true,
+      yieldHistory: [80, 85, 90, 88, 92],
+      predictedYield: 95.0,
+      weatherType: "Sunny",
       tasks: [
-        Task(title: "Stop Irrigation", subtitle: "10 days before harvest", icon: FontAwesomeIcons.ban, color: Colors.red, badge: "Important"),
-        Task(title: "Check Late Blight", subtitle: "Humid weather alert", icon: FontAwesomeIcons.cloudRain, color: Colors.blue, badge: "Weather"),
+        Task(
+          title: "Check Late Blight",
+          subtitle: "Cloudy weather alert",
+          icon: FontAwesomeIcons.cloudRain,
+          color: Colors.red,
+          badge: "Disease Risk",
+          popupTitle: "Late Blight Warning",
+          popupBody: "Cool and cloudy weather is forecasted. This favors Late Blight. Prophylactic spray of Mancozeb @ 2g/L is recommended.",
+          source: "Weather Station",
+        ),
       ],
     ),
-    
-    // --- 6. MAIZE ---
-    "Maize": CropInfo(
-      name: "Maize",
-      stage: "Silking Stage",
-      progress: 0.55,
-      days: "Day 50 of 90",
+
+    // --- 4. SUGARCANE (Cloudy & Healthy) ---
+    "Sugarcane": CropInfo(
+      name: "Sugarcane",
+      stage: "Grand Growth",
+      progress: 0.5,
+      days: "Month 6 of 12",
       isHealthy: true,
+      yieldHistory: [300, 310, 305, 320, 330],
+      predictedYield: 340.0,
+      weatherType: "Cloudy",
       tasks: [
-        Task(title: "Fall Armyworm Check", subtitle: "Inspect whorls", icon: FontAwesomeIcons.bug, color: Colors.orange, badge: "Alert"),
-        Task(title: "Top Dress Urea", subtitle: "Apply 25kg/acre", icon: FontAwesomeIcons.sackDollar, color: Colors.green, badge: "Nutrition"),
+        Task(
+          title: "Propping",
+          subtitle: "Prevent lodging",
+          icon: FontAwesomeIcons.textHeight,
+          color: Colors.green,
+          badge: "Operation",
+          popupTitle: "Crop Propping",
+          popupBody: "Cane height is significant. Tie plants together (Propping) to prevent falling down (lodging) during upcoming high winds.",
+          source: "Calendar",
+        ),
       ],
     ),
   };
 
-  // Helper to get data safely
   static CropInfo get(String cropName) {
     return _data[cropName] ?? _default;
   }

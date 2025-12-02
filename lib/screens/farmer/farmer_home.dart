@@ -3,12 +3,17 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+
 import '../../providers/app_state.dart';
 import '../../utils/translations.dart';
-import '../../data/crop_data.dart'; // IMPORT THE NEW DATA FILE
+import '../../data/crop_data.dart';
+import '../../widgets/quick_tools_widget.dart';
+import '../../widgets/task_action_card.dart';
+import '../../widgets/yield_graph.dart';
 import '../login_screen.dart';
 import 'edit_profile_screen.dart';
-import '../../widgets/quick_tools_widget.dart'; 
+// If you want the chat button to navigate to chat screen:
+// import 'chat_screen.dart'; 
 
 class FarmerHomeScreen extends StatefulWidget {
   const FarmerHomeScreen({super.key});
@@ -18,90 +23,43 @@ class FarmerHomeScreen extends StatefulWidget {
 }
 
 class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
-  bool isOnline = true; 
-  bool isRainy = false; // Toggles weather state
-
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
     final lang = appState.languageCode;
     
-    // 1. GET DYNAMIC DATA BASED ON SELECTION
-    // We don't hardcode "Paddy" anymore. We ask the CropData class.
+    // 1. GET DATA (Simulating API Call)
     final CropInfo cropInfo = CropData.get(appState.selectedCrop);
 
-    // Weather Visuals
-    Color weatherBg = isRainy ? Colors.red[50]! : Colors.blue[50]!;
-    Color weatherBorder = isRainy ? Colors.red[200]! : Colors.blue[100]!;
-    Color weatherText = isRainy ? Colors.red[900]! : Colors.blue[900]!;
-    IconData weatherIcon = isRainy ? FontAwesomeIcons.cloudShowersHeavy : FontAwesomeIcons.cloudSun;
-    String weatherLabel = isRainy ? AppTranslations.get(lang, 'heavy_rain') : "28°C • Clear";
+    // 2. DYNAMIC HEALTH LOGIC (Visuals change based on backend data)
+    final bool isStressed = !cropInfo.isHealthy;
+    final Color healthColor = isStressed ? const Color(0xFFD32F2F) : const Color(0xFF2E7D32);
+    final Color healthBg = isStressed ? Colors.red[50]! : Colors.green[50]!;
+    final IconData healthIcon = isStressed ? FontAwesomeIcons.triangleExclamation : FontAwesomeIcons.leaf;
+    final String healthTitle = isStressed ? "Stress Detected" : "Healthy Crop";
+    final String healthSubtitle = isStressed ? cropInfo.healthIssue : "${cropInfo.days}";
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA), // Slightly off-white background
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: _buildAppBar(appState, cropInfo),
+      drawer: _buildDrawer(context, appState),
       
-      // --- DRAWER (Unchanged logic, just simplified code) ---
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              decoration: const BoxDecoration(color: Color(0xFF2E7D32)),
-              accountName: Text(appState.farmerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              accountEmail: Text("${appState.district} • ${appState.season}"),
-              currentAccountPicture: const CircleAvatar(backgroundColor: Colors.white, child: Icon(Icons.person, size: 40, color: Colors.green)),
-              onDetailsPressed: () {Navigator.pop(context); Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()));},
-            ),
-            ListTile(leading: const Icon(Icons.logout, color: Colors.red), title: Text(AppTranslations.get(lang, 'logout')), onTap: () {Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));}),
-          ],
-        ),
-      ),
-
-      // --- APP BAR ---
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("${AppTranslations.get(lang, 'welcome')}, ${appState.farmerName.split(' ')[0]}", style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
-            GestureDetector(
-              onTap: () { setState(() { isOnline = !isOnline; }); },
-              child: Row(children: [Icon(isOnline ? Icons.cloud_done : Icons.cloud_off, size: 12, color: isOnline ? Colors.green : Colors.grey), const SizedBox(width: 4), Text(isOnline ? AppTranslations.get(lang, 'online') : AppTranslations.get(lang, 'offline'), style: TextStyle(fontSize: 12, color: isOnline ? Colors.grey : Colors.red))]),
-            ),
-          ],
-        ),
-        actions: [
-          // Weather Widget
-          GestureDetector(
-            onTap: () { setState(() { isRainy = !isRainy; }); },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.only(right: 16, left: 8, top: 10, bottom: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(color: weatherBg, borderRadius: BorderRadius.circular(20), border: Border.all(color: weatherBorder)),
-              child: Row(children: [Icon(weatherIcon, size: 16, color: weatherText), const SizedBox(width: 8), Text(weatherLabel, style: TextStyle(fontWeight: FontWeight.bold, color: weatherText, fontSize: 12))]),
-            ),
-          )
-        ],
-      ),
-
-      // --- FLOATING MIC ---
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+      // --- AI VOICE ASSISTANT BUTTON ---
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showListeningModal(context),
         backgroundColor: const Color(0xFF2E7D32),
-        child: const Icon(FontAwesomeIcons.microphone, color: Colors.white),
-      ),
+        elevation: 5,
+        icon: const Icon(Icons.mic, color: Colors.white),
+        label: Text("Ask AI Assistant", style: GoogleFonts.poppins(color: Colors.white, fontWeight: FontWeight.w600)),
+      ).animate().scale(delay: 1.seconds, curve: Curves.elasticOut),
 
-      // --- BODY ---
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. CROP HEADER (Dynamic)
-            // No more list of chips. Just the selected crop context.
+            // CROP HEADER
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -118,10 +76,11 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
                   child: Text(cropInfo.stage, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.orange[800])),
                 )
               ],
-            ),
+            ).animate().fadeIn().slideX(),
+
             const SizedBox(height: 20),
 
-            // 2. HEALTH CARD (Dynamic)
+            // --- DYNAMIC HEALTH CARD ---
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))]),
@@ -129,118 +88,180 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 25,
-                        backgroundColor: cropInfo.isHealthy ? Colors.green[50] : Colors.red[50],
-                        child: Icon(cropInfo.isHealthy ? FontAwesomeIcons.leaf : FontAwesomeIcons.plantWilt, color: cropInfo.isHealthy ? Colors.green : Colors.red),
-                      ),
+                      CircleAvatar(radius: 25, backgroundColor: healthBg, child: Icon(healthIcon, color: healthColor)),
                       const SizedBox(width: 15),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(cropInfo.isHealthy ? "Healthy Crop" : "Attention Needed", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text(cropInfo.days, style: const TextStyle(fontSize: 13, color: Colors.grey)),
-                        ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(healthTitle, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: healthColor)),
+                            Text(healthSubtitle, style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                          ],
+                        ),
                       ),
-                      const Spacer(),
-                      if(cropInfo.isHealthy) const Icon(Icons.check_circle, color: Colors.green) else const Icon(Icons.warning_amber_rounded, color: Colors.red),
+                      Icon(isStressed ? Icons.warning_amber_rounded : Icons.check_circle, color: healthColor, size: 28),
                     ],
                   ),
                   const SizedBox(height: 15),
+                  // Progress Bar changes color based on stress
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
                       value: cropInfo.progress,
                       minHeight: 8,
                       backgroundColor: Colors.grey[100],
-                      valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF2E7D32)),
+                      valueColor: AlwaysStoppedAnimation<Color>(healthColor),
                     ),
                   )
                 ],
               ),
-            ).animate().slideY(begin: 0.1, end: 0, duration: 400.ms),
+            ).animate().slideY(begin: 0.2, end: 0, delay: 200.ms),
 
             const SizedBox(height: 25),
-
-            // 3. QUICK TOOLS (Widget)
-            const QuickToolsWidget(),
-
+            const QuickToolsWidget().animate().fadeIn(delay: 300.ms),
             const SizedBox(height: 25),
 
-            // 4. DO THIS TODAY (Fully Dynamic List)
-            Text(AppTranslations.get(lang, 'do_today'), style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(AppTranslations.get(lang, 'do_today'), style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)).animate().fadeIn(delay: 400.ms),
             const SizedBox(height: 12),
 
-            // Dynamically build the cards from the CropInfo object
             if (cropInfo.tasks.isEmpty)
-              const Center(child: Padding(padding: EdgeInsets.all(20), child: Text("No tasks for today! Relax. 🍵")))
+              const Center(child: Text("No tasks today! Relax. 🍵"))
             else
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: cropInfo.tasks.length,
                 itemBuilder: (context, index) {
-                  final task = cropInfo.tasks[index];
-                  return _buildDynamicActionCard(task)
-                      .animate().fadeIn(delay: (200 * index).ms).slideX();
+                  return TaskActionCard(task: cropInfo.tasks[index])
+                      .animate().slideX(delay: (400 + (index * 100)).ms);
                 },
               ),
-              
-            const SizedBox(height: 40),
+
+            const SizedBox(height: 25),
+
+            // Yield Graph
+            YieldGraphWidget(history: cropInfo.yieldHistory, prediction: cropInfo.predictedYield)
+                .animate().fadeIn(delay: 600.ms).slideY(begin: 0.1, end: 0),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDynamicActionCard(Task task) {
-    return GestureDetector(
-      onTap: () {
-        // In a real app, this would open the specific task detail
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Opened: ${task.title}")));
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
+  // --- DYNAMIC APP BAR (Handles Weather) ---
+  AppBar _buildAppBar(AppState appState, CropInfo cropInfo) {
+    IconData weatherIcon;
+    Color weatherColor;
+    Color weatherBg;
+    String weatherText;
+
+    if (cropInfo.weatherType == "Rainy") {
+      weatherIcon = FontAwesomeIcons.cloudShowersHeavy;
+      weatherColor = Colors.red;
+      weatherBg = Colors.red[50]!;
+      weatherText = "Heavy Rain";
+    } else if (cropInfo.weatherType == "Cloudy") {
+      weatherIcon = FontAwesomeIcons.cloud;
+      weatherColor = Colors.indigo;
+      weatherBg = Colors.indigo[50]!;
+      weatherText = "Cloudy";
+    } else {
+      weatherIcon = FontAwesomeIcons.sun;
+      weatherColor = Colors.orange;
+      weatherBg = Colors.orange[50]!;
+      weatherText = "Sunny 32°C";
+    }
+
+    return AppBar(
+      elevation: 0, backgroundColor: Colors.white, iconTheme: const IconThemeData(color: Colors.black),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Hey, ${appState.farmerName.split(' ')[0]}", style: GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
+          Row(children: [Icon(Icons.cloud_done, size: 12, color: Colors.green), const SizedBox(width: 4), Text("Online Mode", style: const TextStyle(fontSize: 12, color: Colors.grey))]),
+        ],
+      ),
+      actions: [
+        Container(
+          margin: const EdgeInsets.only(right: 16, top: 10, bottom: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(color: weatherBg, borderRadius: BorderRadius.circular(20), border: Border.all(color: weatherColor.withOpacity(0.3))),
+          child: Row(children: [Icon(weatherIcon, size: 14, color: weatherColor), const SizedBox(width: 8), Text(weatherText, style: TextStyle(fontWeight: FontWeight.bold, color: weatherColor, fontSize: 12))]),
+        )
+      ],
+    );
+  }
+
+  void _showListeningModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        height: 250,
+        decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
-          border: Border.all(color: Colors.grey[100]!),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
-        child: Row(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: task.color.withOpacity(0.1), shape: BoxShape.circle),
-              child: Icon(task.icon, color: task.color, size: 22),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(color: task.color.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                        child: Text(task.badge, style: TextStyle(color: task.color, fontWeight: FontWeight.bold, fontSize: 10)),
-                      ),
-                      if (task.isMoney) ...[
-                        const SizedBox(width: 6),
-                        const Icon(Icons.trending_up, size: 14, color: Colors.green)
-                      ]
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(task.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text(task.subtitle, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+            const Text("Listening...", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
+            const SizedBox(height: 20),
+            // Pulsing Animation Widget
+            const AvatarGlowWidget(),
+            const SizedBox(height: 20),
+            Text("Try saying: 'Is my crop healthy?'", style: TextStyle(color: Colors.grey[400], fontSize: 14)),
           ],
+        ),
+      ),
+    );
+  }
+
+  Drawer _buildDrawer(BuildContext context, AppState appState) {
+    return Drawer(
+      child: ListView(padding: EdgeInsets.zero, children: [
+        UserAccountsDrawerHeader(decoration: const BoxDecoration(color: Color(0xFF2E7D32)), accountName: Text(appState.farmerName, style: const TextStyle(fontWeight: FontWeight.bold)), accountEmail: Text("${appState.district} • ${appState.season}"), currentAccountPicture: const CircleAvatar(backgroundColor: Colors.white, child: Icon(Icons.person, color: Colors.green))),
+        ListTile(leading: const Icon(Icons.logout, color: Colors.red), title: const Text("Logout"), onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()))),
+      ]),
+    );
+  }
+}
+
+// Visual Widget for the AI Listening Pulse
+class AvatarGlowWidget extends StatefulWidget {
+  const AvatarGlowWidget({super.key});
+  @override
+  State<AvatarGlowWidget> createState() => _AvatarGlowWidgetState();
+}
+
+class _AvatarGlowWidgetState extends State<AvatarGlowWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: Tween(begin: 1.0, end: 1.2).animate(_controller),
+      child: Container(
+        height: 80, width: 80,
+        decoration: BoxDecoration(color: const Color(0xFF2E7D32).withOpacity(0.2), shape: BoxShape.circle),
+        child: const Center(
+          child: CircleAvatar(
+            radius: 30,
+            backgroundColor: Color(0xFF2E7D32),
+            child: Icon(Icons.mic, color: Colors.white, size: 30),
+          ),
         ),
       ),
     );
