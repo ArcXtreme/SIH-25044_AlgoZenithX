@@ -10,10 +10,8 @@ import '../../data/crop_data.dart';
 import '../../widgets/quick_tools_widget.dart';
 import '../../widgets/task_action_card.dart';
 import '../../widgets/yield_graph.dart';
-import '../login_screen.dart';
-import 'edit_profile_screen.dart';
-// If you want the chat button to navigate to chat screen:
-// import 'chat_screen.dart'; 
+import '../../widgets/sidebar_drawer.dart'; // NEW IMPORT
+// import '../login_screen.dart'; // Removed as logout is in sidebar now
 
 class FarmerHomeScreen extends StatefulWidget {
   const FarmerHomeScreen({super.key});
@@ -42,7 +40,9 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: _buildAppBar(appState, cropInfo),
-      drawer: _buildDrawer(context, appState),
+      
+      // --- SIDEBAR DRAWER ---
+      drawer: const SidebarDrawer(), // Using the new separate file
       
       // --- AI VOICE ASSISTANT BUTTON ---
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -214,15 +214,6 @@ class _FarmerHomeScreenState extends State<FarmerHomeScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Drawer _buildDrawer(BuildContext context, AppState appState) {
-    return Drawer(
-      child: ListView(padding: EdgeInsets.zero, children: [
-        UserAccountsDrawerHeader(decoration: const BoxDecoration(color: Color(0xFF2E7D32)), accountName: Text(appState.farmerName, style: const TextStyle(fontWeight: FontWeight.bold)), accountEmail: Text("${appState.district} • ${appState.season}"), currentAccountPicture: const CircleAvatar(backgroundColor: Colors.white, child: Icon(Icons.person, color: Colors.green))),
-        ListTile(leading: const Icon(Icons.logout, color: Colors.red), title: const Text("Logout"), onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()))),
-      ]),
     );
   }
 }
