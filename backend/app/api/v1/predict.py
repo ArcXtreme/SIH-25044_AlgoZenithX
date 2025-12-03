@@ -8,8 +8,15 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.core.auth import get_current_user
 from app.models.models import Farm, Prediction, User
-from app.schemas.schemas import PredictIn, PredictOut, PredictionOut
+from app.schemas.schemas import (
+    PredictIn,
+    PredictOut,
+    PredictionOut,
+    SimplePredictIn,
+    SimplePredictOut,
+)
 from app.i18n import translate
+from app.services.dataset_predictor import predict_yield_from_dataset
 
 router = APIRouter()
 
@@ -125,6 +132,30 @@ def predict(
         predicted_yield=predicted_yield,
         confidence=confidence,
         recommendation=final_recommendation,
+    )
+
+
+
+@router.post("/simple", response_model=SimplePredictOut)
+def simple_predict(
+    payload: SimplePredictIn,
+    user: User = Depends(get_current_user),
+):
+    """Simple yield prediction based only on district, crop, season and land area.
+
+    Uses historical averages from the AIML dataset (final_dataset.csv).
+    """
+    yield_t_ha, total_tons = predict_yield_from_dataset(
+        district=payload.district,
+        crop=payload.crop,
+        season=payload.season,
+        area_acres=payload.area_acres,
+    )
+
+    return SimplePredictOut(
+        predicted_yield_t_ha=yield_t_ha,
+        predicted_total_tons=total_tons,
+        message="Predicted from historical dataset averages (tons/ha and total tons)",
     )
 
 

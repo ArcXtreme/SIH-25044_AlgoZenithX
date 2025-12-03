@@ -9,6 +9,12 @@ class UserCreate(BaseModel):
     password: str
     language_preference: Optional[str] = "en"
 
+
+class LoginRequest(BaseModel):
+    phone: str
+    password: str
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -90,10 +96,24 @@ class PredictIn(BaseModel):
     farm_id: int
     crop: str
 
+
 class PredictOut(BaseModel):
     predicted_yield: float
     confidence: float
     recommendation: Optional[RecommendationOut] = None
+
+
+class SimplePredictIn(BaseModel):
+    district: str
+    crop: str
+    season: str
+    area_acres: float
+
+
+class SimplePredictOut(BaseModel):
+    predicted_yield_t_ha: float
+    predicted_total_tons: float
+    message: Optional[str] = None
 
 class PredictionOut(BaseModel):
     id: int
@@ -130,3 +150,31 @@ class PushOutItem(BaseModel):
 
 class PushOut(BaseModel):
     results: List[PushOutItem]
+
+# --- Weather Data ---
+class WeatherDataOut(BaseModel):
+    id: int
+    farm_id: Optional[int]
+    latitude: float
+    longitude: float
+    temperature: Optional[float]
+    humidity: Optional[float]
+    pressure: Optional[float]
+    wind_speed: Optional[float]
+    wind_direction: Optional[float]
+    precipitation: Optional[float]
+    uv_index: Optional[float]
+    visibility: Optional[float]
+    weather_description: Optional[str]
+    weather_icon: Optional[str]
+    forecast_data: Optional[Dict[str, Any]]
+    agromonitoring_data: Optional[Dict[str, Any]]
+    recorded_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class WeatherDataCreate(BaseModel):
+    farm_id: Optional[int] = None
+    latitude: float
+    longitude: float

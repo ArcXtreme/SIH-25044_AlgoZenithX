@@ -86,3 +86,26 @@ class RefreshToken(Base):
     token = Column(String, nullable=False, unique=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+class WeatherData(Base):
+    __tablename__ = "weather_data"
+    id = Column(Integer, primary_key=True, index=True)
+    farm_id = Column(Integer, ForeignKey("farms.id"), nullable=True, index=True)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    temperature = Column(Float, nullable=True)  # in Celsius
+    humidity = Column(Float, nullable=True)  # percentage
+    pressure = Column(Float, nullable=True)  # in hPa
+    wind_speed = Column(Float, nullable=True)  # in m/s
+    wind_direction = Column(Float, nullable=True)  # in degrees
+    precipitation = Column(Float, nullable=True)  # in mm
+    uv_index = Column(Float, nullable=True)
+    visibility = Column(Float, nullable=True)  # in meters
+    weather_description = Column(String, nullable=True)  # e.g., "Clear sky", "Rain"
+    weather_icon = Column(String, nullable=True)  # icon code from API
+    forecast_data = Column(JSON, nullable=True)  # store forecast data
+    agromonitoring_data = Column(JSON, nullable=True)  # store agromonitoring data
+    recorded_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+    farm = relationship("Farm", backref="weather_records")
+
