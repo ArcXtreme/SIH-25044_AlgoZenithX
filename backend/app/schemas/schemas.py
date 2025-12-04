@@ -108,12 +108,18 @@ class SimplePredictIn(BaseModel):
     crop: str
     season: str
     area_acres: float
+    irrigation_days: Optional[int] = None
+    n_kg_per_ha: Optional[float] = None
+    p_kg_per_ha: Optional[float] = None
+    k_kg_per_ha: Optional[float] = None
 
 
 class SimplePredictOut(BaseModel):
     predicted_yield_t_ha: float
     predicted_total_tons: float
+    accuracy: float
     message: Optional[str] = None
+    recommendations: List[str] = []
 
 class PredictionOut(BaseModel):
     id: int
@@ -178,3 +184,19 @@ class WeatherDataCreate(BaseModel):
     farm_id: Optional[int] = None
     latitude: float
     longitude: float
+
+
+class DailyForecastOut(BaseModel):
+    date: str
+    condition: str
+    temp_min_c: float
+    temp_max_c: float
+    precipitation_mm: float
+    weather_code: int
+
+
+class DistrictForecastOut(BaseModel):
+    district: str
+    latitude: float
+    longitude: float
+    forecast: List[DailyForecastOut]

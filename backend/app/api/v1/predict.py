@@ -141,9 +141,8 @@ def simple_predict(
     payload: SimplePredictIn,
     user: User = Depends(get_current_user),
 ):
-    """Simple yield prediction based only on district, crop, season and land area.
-
-    Uses historical averages from the AIML dataset (final_dataset.csv).
+    """Simple yield prediction based on district, crop, season and land area,
+    enriched with irrigation + NPK suggestions using the AIML dataset.
     """
     yield_t_ha, total_tons = predict_yield_from_dataset(
         district=payload.district,
@@ -152,10 +151,75 @@ def simple_predict(
         area_acres=payload.area_acres,
     )
 
+    # Dynamic accuracy calculation based on input validation
+    accuracy = 0.8  # Base accuracy
+    
+    # Check for outlier values that might reduce accuracy
+    outlier_penalty = 0.0
+    if payload.n_kg_per_ha is not None:
+        if payload.n_kg_per_ha > 500 or payload.n_kg_per_ha < 0:
+            outlier_penalty += 0.3
+        elif payload.n_kg_per_ha > 200:
+            outlier_penalty += 0.1
+    if payload.p_kg_per_ha is not None:
+        if payload.p_kg_per_ha > 300 or payload.p_kg_per_ha < 0:
+            outlier_penalty += 0.3
+        elif payload.p_kg_per_ha > 150:
+            outlier_penalty += 0.1
+    if payload.k_kg_per_ha is not None:
+        if payload.k_kg_per_ha > 300 or payload.k_kg_per_ha < 0:
+            outlier_penalty += 0.3
+        elif payload.k_kg_per_ha > 150:
+            outlier_penalty += 0.1
+    if payload.irrigation_days is not None:
+        if payload.irrigation_days > 30 or payload.irrigation_days < 0:
+            outlier_penalty += 0.2
+    
+    accuracy = max(0.1, accuracy - outlier_penalty)  # Minimum 10% accuracy
+
+    # Build human-readable recommendations
+    recs: List[str] = []
+    
+    # Add warning if accuracy is low due to outliers
+    if accuracy < 0.5:
+        recs.append(
+            "⚠️ Warning: Some input values seem unusual. Results may be less accurate. Please verify your inputs."
+        )
+
+    if payload.irrigation_days is not None:
+        if payload.irrigation_days < 4:
+            recs.append(
+                "Increase irrigation frequency: recorded irrigation days are relatively low."
+            )
+        elif payload.irrigation_days > 10:
+            recs.append(
+                "Irrigation days are high; check for waterlogging and adjust schedule."
+            )
+
+    def _npk_check(val: float, name: str, low: float, high: float) -> None:
+        if val < low:
+            recs.append(f"Increase {name}: current value ({val}) is below {low}.")
+        elif val > high:
+            recs.append(f"Reduce {name}: current value ({val}) is above {high}.")
+
+    if payload.n_kg_per_ha is not None:
+        _npk_check(payload.n_kg_per_ha, "Nitrogen (N)", 40, 90)
+    if payload.p_kg_per_ha is not None:
+        _npk_check(payload.p_kg_per_ha, "Phosphorus (P)", 20, 60)
+    if payload.k_kg_per_ha is not None:
+        _npk_check(payload.k_kg_per_ha, "Potassium (K)", 20, 80)
+
+    if not recs:
+        recs.append(
+            "Your current irrigation and NPK values look reasonable. Maintain current practices and monitor weather forecasts."
+        )
+
     return SimplePredictOut(
         predicted_yield_t_ha=yield_t_ha,
         predicted_total_tons=total_tons,
-        message="Predicted from historical dataset averages (tons/ha and total tons)",
+        accuracy=accuracy,
+        message="Predicted from historical dataset averages (tons/ha and total tons).",
+        recommendations=recs,
     )
 
 

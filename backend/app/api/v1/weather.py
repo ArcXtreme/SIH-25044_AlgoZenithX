@@ -10,7 +10,7 @@ from app.models.models import Farm, WeatherData, User
 from app.core.auth import get_current_user
 from app.services.weather_service import weather_service
 from app.services.agromonitoring_service import agromonitoring_service
-from app.schemas.schemas import WeatherDataOut
+from app.schemas.schemas import WeatherDataOut, DistrictForecastOut
 from shapely.geometry import shape
 from geoalchemy2.shape import to_shape
 import logging
@@ -18,6 +18,23 @@ import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+@router.get("/district-forecast", response_model=DistrictForecastOut)
+async def get_district_forecast(
+    district: str = Query(..., description="Name of the Odisha district"),
+    days: int = Query(default=10, ge=1, le=16),
+    user: User = Depends(get_current_user),
+):
+    """
+    Fetch up to 16-day forecast for a given Odisha district (default 10 days).
+    """
+    data = await weather_service.get_district_forecast(district, days=days)
+    if not data:
+        raise HTTPException(
+            status_code=404,
+            detail="Forecast unavailable for this district. Please verify the name.",
+        )
+    return data
+
 
 
 def get_farm_center(farm: Farm) -> Tuple[Optional[float], Optional[float]]:
