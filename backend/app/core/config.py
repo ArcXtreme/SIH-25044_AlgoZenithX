@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
     
-    # Use a property or rely on the .env file correctly overriding these
+    
     DATABASE_URL: str = "" 
 
     SECRET_KEY: str = "supersecretkeychangeme"
@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     AGROMONITORING_API_KEY: str = ""
     WEATHER_UPDATE_INTERVAL_HOURS: int = 6
 
-    # This Config class is the MAGIC part you are missing
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

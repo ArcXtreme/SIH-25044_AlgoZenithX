@@ -7,7 +7,7 @@ from app.core.security import get_password_hash, verify_password, create_access_
 
 router = APIRouter()
 
-# Create DB tables if not present (simple approach for hackathon)
+
 Base.metadata.create_all(bind=engine)
 
 @router.post("/register", response_model=UserOut)
